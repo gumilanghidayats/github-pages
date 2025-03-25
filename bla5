@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambulance Calculator BLA 05 Karang Anyar</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+        }
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+    table {
+        min-width: 700px; /* atau lebih sesuai kebutuhan */
+    }
+}
+
+        .container {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        /* Button warna */
+        .btn-blue {
+            background: #007bff;
+        }
+        .btn-blue:hover {
+            background: #0056b3;
+        }
+
+        .btn-green {
+            background: #28a745;
+        }
+        .btn-green:hover {
+            background: #1e7e34;
+        }
+
+        .btn-orange {
+            background: #fd7e14;
+        }
+        .btn-orange:hover {
+            background: #e8590c;
+        }
+
+        .btn-red {
+            background: #dc3545;
+        }
+        .btn-red:hover {
+            background: #b21f2d;
+        }
+
+        .btn-purple {
+            background: #6f42c1;
+        }
+        .btn-purple:hover {
+            background: #563d7c;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        canvas {
+            margin-top: 30px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        #totalDisplay {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 5px;
+        }
+
+        .pagination button {
+            width: auto;
+            padding: 8px 12px;
+            background: #17a2b8;
+        }
+
+        .pagination button:hover {
+            background: #117a8b;
+        }
+
+        @media (max-width: 600px) {
+            .actions {
+                grid-template-columns: 1fr;
+            }
+            button, input, select {
+                font-size: 1.1em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Ambulance Calculator BLA 05 Karang Anyar</h2>
+        <label>Nama Supir</label>
+        <input type="text" id="driver">
+
+        <label>Nama Pemohon</label>
+        <input type="text" id="applicant">
+
+        <label>Alamat Pemohon</label>
+        <input type="text" id="address">
+
+        <label>Kota Tujuan</label>
+        <input type="text" id="city">
+
+        <label>Tanggal (dd/mm/yyyy)</label>
+        <input type="date" id="date">
+
+        <label>Jarak (km)</label>
+        <input type="number" id="distance">
+
+        <button class="btn-blue" onclick="checkDistance()">Cek Jarak via Google Maps</button>
+
+        <label>Biaya per km (Rp)</label>
+        <input type="number" id="costPerKm">
+
+        <button class="btn-green" onclick="calculate()">Hitung & Simpan</button>
+
+        <div class="actions">
+            <select id="filterDriver">
+                <option value="">Filter Supir</option>
+            </select>
+            <select id="filterCity">
+                <option value="">Filter Kota</option>
+            </select>
+            <input type="date" id="filterDate">
+            <button class="btn-orange" onclick="resetFilter()">Reset</button>
+            <button class="btn-red" onclick="applyFilter()">OK</button>
+        </div>
+
+        <div id="totalDisplay"></div>
+
+      <div class="table-wrapper">
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Nama Pemohon</th>
+                <th>Alamat</th>
+                <th>Nama Supir</th>
+                <th>Kota</th>
+                <th>Tanggal</th>
+                <th>Jarak (km)</th>
+                <th>Bensin (liter)</th>
+                <th>Total Biaya (Rp)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+        <div class="pagination" id="pagination"></div>
+
+        <div class="export-buttons">
+            <button class="btn-purple" onclick="exportPDF()">Export PDF</button>
+            <button class="btn-blue" onclick="exportExcel()">Export Excel</button>
+        </div>
+
+        <canvas id="cityChart"></canvas>
+
+<div class="table-wrapper">
+    <table id="leaderboardTable">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Nama Supir</th>
+                <th>Jumlah Antar</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        const data = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        function calculate() {
+            const driver = document.getElementById('driver').value;
+            const applicant = document.getElementById('applicant').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const date = document.getElementById('date').value;
+            const distance = parseFloat(document.getElementById('distance').value);
+            const costPerKm = parseFloat(document.getElementById('costPerKm').value);
+            const fuel = (distance / 10).toFixed(1);
+            const total = distance * costPerKm;
+
+            if (!driver || !applicant || !address || !city || !date || isNaN(distance) || isNaN(costPerKm)) {
+                alert('Harap isi semua kolom.');
+                return;
+            }
+
+            data.push({ driver, applicant, address, city, date, distance, fuel, total });
+            updateFilterOptions();
+            updateTable();
+            updateLeaderboard();
+            updateChart();
+        }
+
+        function updateFilterOptions() {
+            const driverSet = new Set(data.map(d => d.driver));
+            const citySet = new Set(data.map(d => d.city));
+
+            const filterDriver = document.getElementById('filterDriver');
+            const filterCity = document.getElementById('filterCity');
+            filterDriver.innerHTML = '<option value="">Filter Supir</option>';
+            filterCity.innerHTML = '<option value="">Filter Kota</option>';
+
+            driverSet.forEach(driver => {
+                filterDriver.innerHTML += `<option value="${driver}">${driver}</option>`;
+            });
+
+            citySet.forEach(city => {
+                filterCity.innerHTML += `<option value="${city}">${city}</option>`;
+            });
+        }
+
+        function updateTable() {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+
+            const filterDriver = document.getElementById('filterDriver').value.toLowerCase();
+            const filterCity = document.getElementById('filterCity').value.toLowerCase();
+            const filterDate = document.getElementById('filterDate').value;
+
+            const filteredData = data.filter(entry => {
+                const driverMatch = !filterDriver || entry.driver.toLowerCase() === filterDriver;
+                const cityMatch = !filterCity || entry.city.toLowerCase() === filterCity;
+                const dateMatch = !filterDate || entry.date === filterDate;
+                return driverMatch && cityMatch && dateMatch;
+            });
+
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedData = filteredData.reverse().slice(start, end);
+
+            let totalAntar = 0;
+
+            paginatedData.forEach(entry => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${entry.applicant}</td>
+                        <td>${entry.address}</td>
+                        <td>${entry.driver}</td>
+                        <td>${entry.city}</td>
+                        <td>${entry.date}</td>
+                        <td>${entry.distance}</td>
+                        <td>${entry.fuel}</td>
+                        <td>Rp ${entry.total.toLocaleString()}</td>
+                    </tr>`;
+                totalAntar += entry.total;
+            });
+
+            document.getElementById('totalDisplay').innerText = `Total Biaya: Rp ${totalAntar.toLocaleString()}`;
+
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.innerHTML += `<button onclick="goToPage(${i})">${i}</button>`;
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            updateTable();
+        }
+
+        function resetFilter() {
+            document.getElementById('filterDriver').value = '';
+            document.getElementById('filterCity').value = '';
+            document.getElementById('filterDate').value = '';
+            updateTable();
+        }
+
+        function applyFilter() {
+            currentPage = 1;
+            updateTable();
+        }
+
+        function checkDistance() {
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            if (!address || !city) {
+                alert('Isi alamat dan kota terlebih dahulu.');
+                return;
+            }
+            const url = `https://www.google.com/maps/dir/${encodeURIComponent(address)}/${encodeURIComponent(city)}`;
+            window.open(url, '_blank');
+        }
+
+        function updateLeaderboard() {
+            const leaderboard = {};
+            data.forEach(entry => {
+                if (!leaderboard[entry.driver]) leaderboard[entry.driver] = 0;
+                leaderboard[entry.driver]++;
+            });
+
+            const sorted = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
+
+            const tbody = document.querySelector('#leaderboardTable tbody');
+            tbody.innerHTML = '';
+            sorted.forEach(([driver, count], index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${driver}</td>
+                        <td>${count}</td>
+                    </tr>`;
+            });
+        }
+
+        function updateChart() {
+            const cityCounts = {};
+            data.forEach(entry => {
+                cityCounts[entry.city] = (cityCounts[entry.city] || 0) + 1;
+            });
+
+            const ctx = document.getElementById('cityChart').getContext('2d');
+            if (window.cityChart) window.cityChart.destroy();
+            window.cityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(cityCounts),
+                    datasets: [{
+                        label: 'Jumlah Antar',
+                        data: Object.values(cityCounts),
+                        backgroundColor: '#007bff'
+                    }]
+                }
+            });
+        }
+
+        function exportExcel() {
+            const ws = XLSX.utils.json_to_sheet(data.map(entry => ({
+                'Nama Pemohon': entry.applicant,
+                'Alamat': entry.address,
+                'Nama Supir': entry.driver,
+                'Kota': entry.city,
+                'Tanggal': entry.date,
+                'Jarak (km)': entry.distance,
+                'Bensin (liter)': entry.fuel,
+                'Total Biaya (Rp)': entry.total
+            })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Data');
+            XLSX.writeFile(wb, 'data.xlsx');
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const rows = data.map(entry => [
+                entry.applicant, entry.address, entry.driver, entry.city, entry.date,
+                entry.distance, entry.fuel, `Rp ${entry.total.toLocaleString()}`
+            ]);
+
+            doc.autoTable({
+                head: [['Nama Pemohon', 'Alamat', 'Nama Supir', 'Kota', 'Tanggal', 'Jarak (km)', 'Bensin (liter)', 'Total Biaya (Rp)']],
+                body: rows
+            });
+            doc.save('data.pdf');
+        }
+    </script>
+</body>
+
+</html>
